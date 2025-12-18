@@ -1,6 +1,7 @@
 /**
  * Gift Exchange Web App Logic
  */
+alert("版本: 15:27 (修復括號)");
 
 class SoundManager {
     constructor() {
@@ -524,4 +525,8 @@ class GiftExchangeApp {
 }
 
 // Global instance for onclick handlers
-const app = new GiftExchangeApp();
+try {
+    const app = new GiftExchangeApp();
+} catch (e) {
+    alert("初始化錯誤: " + e.message + "\n" + e.stack);
+}
