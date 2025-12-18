@@ -247,9 +247,18 @@ class GiftExchangeApp {
     }
 
     drawWheel(angleOffset) {
+        if (!this.wheel.ctx) {
+            logToConsole("Err: Context missing!");
+            return;
+        }
+        // ... Log once or verify dimensions
+        if (this.wheel.canvas.width === 0) logToConsole("Warn: Canvas W=0");
+
         const ctx = this.wheel.ctx;
-        const width = 300;
+        const width = 300; // Logical width
         const height = 300;
+        // Don't log every frame, too spammy.
+
         const cx = width / 2;
         const cy = height / 2;
         const radius = 140;
@@ -295,8 +304,10 @@ class GiftExchangeApp {
     spinWheel() {
         try {
             if (this.isSpinning) return;
+            logToConsole("Spin requested...");
 
             if (!this.targetOptions || this.targetOptions.length === 0) {
+                logToConsole("Error: No targets!");
                 alert("錯誤: 沒有可用的禮物選項！可能是名單邏輯問題，請重新開始嘗試。");
                 return;
             }
@@ -307,6 +318,7 @@ class GiftExchangeApp {
             // Random outcome
             const randomIndex = Math.floor(Math.random() * this.targetOptions.length);
             const selectedGift = this.targetOptions[randomIndex];
+            logToConsole(`Target: ${selectedGift.owner}`);
 
             // Animation
             const spinDuration = 4000; // 4s
@@ -322,6 +334,7 @@ class GiftExchangeApp {
             }
 
             let start = null;
+            logToConsole("Starting anim loop...");
 
             const animate = (timestamp) => {
                 try {
@@ -336,12 +349,13 @@ class GiftExchangeApp {
                         this.drawWheel(currentRot);
                         requestAnimationFrame(animate);
                     } else {
+                        logToConsole("Anim done.");
                         this.drawWheel(finalAngle);
                         this.isSpinning = false;
                         setTimeout(() => this.showResult(selectedGift), 500);
                     }
                 } catch (e) {
-                    alert('動畫執行錯誤: ' + e.message);
+                    logToConsole("Anim Err: " + e.message);
                     this.isSpinning = false;
                     this.wheel.spinBtn.disabled = false;
                 }
@@ -349,7 +363,7 @@ class GiftExchangeApp {
 
             requestAnimationFrame(animate);
         } catch (e) {
-            alert("啟動轉盤錯誤: " + e.message);
+            logToConsole("Spin Err: " + e.message);
             this.isSpinning = false;
             this.wheel.spinBtn.disabled = false;
         }
@@ -446,12 +460,23 @@ class GiftExchangeApp {
     }
 }
 
-// Global instance for onclick handlers
+// Debug Logger
+function logToConsole(msg) {
+    const el = document.getElementById('debug-console');
+    if (el) {
+        const line = document.createElement('div');
+        line.textContent = `> ${msg}`;
+        el.appendChild(line);
+        el.scrollTop = el.scrollHeight;
+    }
+    console.log(msg);
+}
+
 // Global instance for onclick handlers
 const app = new GiftExchangeApp();
 
 window.onerror = function (msg, url, line, col, error) {
-    // Ignore ResizeObserver loop limit exceeded
     if (msg.includes('ResizeObserver')) return;
-    alert(`System Error: ${msg}\nLine: ${line}`);
+    logToConsole(`Sys Err: ${msg} @ L${line}`);
+    alert(`Error: ${msg}`); // Fallback
 };
