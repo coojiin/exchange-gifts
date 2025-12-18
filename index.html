@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>聖誕交換禮物</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -20,7 +20,7 @@
 
         <!-- Setup Screen -->
         <div id="setup-screen" class="screen active">
-            <h1>🎅 交換禮物大會 🎄</h1>
+            <h1>交換禮物大會</h1>
             <div class="input-group">
                 <input type="text" id="name-input" placeholder="輸入參加者名字" />
                 <button id="add-btn">新增</button>
@@ -34,7 +34,7 @@
         <!-- Dashboard Screen -->
         <div id="dashboard-screen" class="screen hidden">
             <header>
-                <h2>🎁 誰要抽禮物？</h2>
+                <h2>誰要抽禮物？</h2>
                 <div class="progress-info">剩餘: <span id="remaining-count">0</span></div>
             </header>
             <div class="card-grid" id="spinner-selection-grid">
@@ -59,11 +59,11 @@
         <!-- Result Modal -->
         <div id="result-modal" class="modal hidden">
             <div class="modal-content">
-                <h2>🎉 恭喜! 🎉</h2>
+                <h2>恭喜!</h2>
                 <p><span id="result-spinner">User</span> 抽到了...</p>
                 <div class="gift-reveal">
                     <span id="result-gift">Target</span>
-                    <div class="gift-icon">🎁</div>
+                    <div class="gift-icon">★</div>
                 </div>
                 <button id="confirm-result-btn" class="main-action-btn">確認</button>
             </div>
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 </body>
 
 </html>
