@@ -394,18 +394,13 @@ class GiftExchangeApp {
             // Animation Config
             const spinDuration = 10000; // Increased to 10s
             const sliceCount = this.targetOptions.length;
+            // targetIndex is randomIndex. Slice center relative to wheel start (3 o'clock) is (targetIndex + 0.5) * sliceArc.
+            // We want this to land at 12 o'clock (-PI/2 or 1.5 * PI).
+            // Rotation + SliceCenter = 1.5 * PI
+            // Rotation = 1.5 * PI - SliceCenter
+            const extraRotations = 10;
             const sliceArc = (2 * Math.PI) / this.targetOptions.length;
-
-            // targetMidAngle is where the slice center is relative to 3 o'clock
-            const targetMidAngle = (randomIndex + 0.5) * sliceArc;
-
-            // Arrow is at the Top (which is -PI/2 in Canvas coords)
-            const arrowAngle = -Math.PI / 2;
-
-            // We want WheelRotation + targetMidAngle = arrowAngle
-            // WheelRotation = arrowAngle - targetMidAngle
-            const extraRotations = (10 + Math.random() * 5) * (2 * Math.PI);
-            const finalAngle = extraRotations + (arrowAngle - targetMidAngle);
+            const finalAngle = (extraRotations * 2 * Math.PI) + (1.5 * Math.PI - (randomIndex + 0.5) * sliceArc);
 
             if (isNaN(finalAngle)) throw new Error("角度計算錯誤 (NaN)");
 
@@ -425,11 +420,7 @@ class GiftExchangeApp {
                         const currentRot = finalAngle * ease;
                         this.drawWheel(currentRot);
 
-                        // Sound Logic: Check boundary crossing
-                        // We track Rotation in Radians.
-                        // Every sliceArc radians we should tick? Or every small division.
-                        // Let's tick N times per rotation where N = sliceCount
-                        // Check if floor(current / sliceArc) > floor(last / sliceArc)
+                        // Sound Logic
                         const currentSliceIdx = Math.floor(currentRot / sliceArc);
                         const lastSliceIdx = Math.floor(lastRotation / sliceArc);
 
@@ -440,13 +431,11 @@ class GiftExchangeApp {
                         lastRotation = currentRot;
                         requestAnimationFrame(animate);
                     } else {
-                        // Ensure final snap
                         this.drawWheel(finalAngle);
                         this.isSpinning = false;
                         setTimeout(() => this.showResult(selectedGift), 500);
                     }
                 } catch (e) {
-                    // Fail silently or log to console in production
                     console.error(e);
                     this.isSpinning = false;
                     this.wheel.spinBtn.disabled = false;
