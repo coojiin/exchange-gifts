@@ -348,116 +348,118 @@ class GiftExchangeApp {
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#F8B229';
         ctx.stroke();
-        spinWheel() {
-            try {
-                if (this.isSpinning) return;
-                this.sound.resume(); // Ensure audio is ready
+    } // End drawWheel
 
-                if (!this.targetOptions || this.targetOptions.length === 0) {
-                    alert("錯誤: 沒有可用的禮物選項！可能是名單邏輯問題，請重新開始嘗試。");
-                    return;
-                }
+    spinWheel() {
+        try {
+            if (this.isSpinning) return;
+            this.sound.resume(); // Ensure audio is ready
 
-                this.isSpinning = true;
-                this.wheel.spinBtn.disabled = true;
-
-                // Random outcome
-                const randomIndex = Math.floor(Math.random() * this.targetOptions.length);
-                const selectedGift = this.targetOptions[randomIndex];
-
-                // Animation Config
-                const spinDuration = 8000; // Increased to 8s
-                const sliceCount = this.targetOptions.length;
-                const sliceArc = (2 * Math.PI) / sliceCount;
-
-                // Target Calculation
-                const targetMidAngle = (randomIndex + 0.5) * sliceArc;
-                // Add extra rotations - make it variable for realism
-                const extraRotations = (8 + Math.random() * 4) * (2 * Math.PI);
-                const finalAngle = extraRotations - targetMidAngle;
-
-                if (isNaN(finalAngle)) throw new Error("角度計算錯誤 (NaN)");
-
-                let start = null;
-                let lastRotation = 0;
-
-                const animate = (timestamp) => {
-                    try {
-                        if (!start) start = timestamp;
-                        const progress = timestamp - start;
-
-                        if (progress < spinDuration) {
-                            let t = progress / spinDuration;
-                            // Cubic/Quartic ease out for heavy inertia feel
-                            // 1 - (1-t)^4
-                            const ease = 1 - Math.pow(1 - t, 4);
-
-                            const currentRot = finalAngle * ease;
-                            this.drawWheel(currentRot);
-
-                            // Sound Logic: Check boundary crossing
-                            // We track Rotation in Radians. 
-                            // Every sliceArc radians we should tick? Or every small division.
-                            // Let's tick N times per rotation where N = sliceCount
-                            // Check if floor(current / sliceArc) > floor(last / sliceArc)
-                            const currentSliceIdx = Math.floor(currentRot / sliceArc);
-                            const lastSliceIdx = Math.floor(lastRotation / sliceArc);
-
-                            if (currentSliceIdx > lastSliceIdx) {
-                                this.sound.playTick();
-                            }
-
-                            lastRotation = currentRot;
-                            requestAnimationFrame(animate);
-                        } else {
-                            // Ensure final snap
-                            this.drawWheel(finalAngle);
-                            this.isSpinning = false;
-                            setTimeout(() => this.showResult(selectedGift), 500);
-                        }
-                    } catch (e) {
-                        alert("Anim Err: " + e.message);
-                        this.isSpinning = false;
-                        this.wheel.spinBtn.disabled = false;
-                    }
-                };
-
-                requestAnimationFrame(animate);
-            } catch (e) {
-                alert("Spin Err: " + e.message);
-                this.isSpinning = false;
-                this.wheel.spinBtn.disabled = false;
+            if (!this.targetOptions || this.targetOptions.length === 0) {
+                alert("錯誤: 沒有可用的禮物選項！可能是名單邏輯問題，請重新開始嘗試。");
+                return;
             }
+
+            this.isSpinning = true;
+            this.wheel.spinBtn.disabled = true;
+
+            // Random outcome
+            const randomIndex = Math.floor(Math.random() * this.targetOptions.length);
+            const selectedGift = this.targetOptions[randomIndex];
+
+            // Animation Config
+            const spinDuration = 8000; // Increased to 8s
+            const sliceCount = this.targetOptions.length;
+            const sliceArc = (2 * Math.PI) / sliceCount;
+
+            // Target Calculation
+            const targetMidAngle = (randomIndex + 0.5) * sliceArc;
+            // Add extra rotations - make it variable for realism
+            const extraRotations = (8 + Math.random() * 4) * (2 * Math.PI);
+            const finalAngle = extraRotations - targetMidAngle;
+
+            if (isNaN(finalAngle)) throw new Error("角度計算錯誤 (NaN)");
+
+            let start = null;
+            let lastRotation = 0;
+
+            const animate = (timestamp) => {
+                try {
+                    if (!start) start = timestamp;
+                    const progress = timestamp - start;
+
+                    if (progress < spinDuration) {
+                        let t = progress / spinDuration;
+                        // Cubic/Quartic ease out for heavy inertia feel
+                        // 1 - (1-t)^4
+                        const ease = 1 - Math.pow(1 - t, 4);
+
+                        const currentRot = finalAngle * ease;
+                        this.drawWheel(currentRot);
+
+                        // Sound Logic: Check boundary crossing
+                        // We track Rotation in Radians. 
+                        // Every sliceArc radians we should tick? Or every small division.
+                        // Let's tick N times per rotation where N = sliceCount
+                        // Check if floor(current / sliceArc) > floor(last / sliceArc)
+                        const currentSliceIdx = Math.floor(currentRot / sliceArc);
+                        const lastSliceIdx = Math.floor(lastRotation / sliceArc);
+
+                        if (currentSliceIdx > lastSliceIdx) {
+                            this.sound.playTick();
+                        }
+
+                        lastRotation = currentRot;
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Ensure final snap
+                        this.drawWheel(finalAngle);
+                        this.isSpinning = false;
+                        setTimeout(() => this.showResult(selectedGift), 500);
+                    }
+                } catch (e) {
+                    alert("Anim Err: " + e.message);
+                    this.isSpinning = false;
+                    this.wheel.spinBtn.disabled = false;
+                }
+            };
+
+            requestAnimationFrame(animate);
+        } catch (e) {
+            alert("Spin Err: " + e.message);
+            this.isSpinning = false;
+            this.wheel.spinBtn.disabled = false;
         }
+    }
 
+    /* --- Result Phase --- */
 
-        showResult(gift) {
-            this.currentResult = gift;
-            this.modal.spinner.textContent = this.currentSpinner;
-            this.modal.gift.textContent = gift.owner;
-            this.modal.el.classList.remove('hidden');
+    showResult(gift) {
+        this.currentResult = gift;
+        this.modal.spinner.textContent = this.currentSpinner;
+        this.modal.gift.textContent = gift.owner;
+        this.modal.el.classList.remove('hidden');
 
-            this.triggerConfetti();
-        }
+        this.triggerConfetti();
+    }
 
-        confirmResult() {
-            // Update State
-            const giftIndex = this.gifts.findIndex(g => g.owner === this.currentResult.owner);
-            this.gifts[giftIndex].taken = true;
+    confirmResult() {
+        // Update State
+        const giftIndex = this.gifts.findIndex(g => g.owner === this.currentResult.owner);
+        this.gifts[giftIndex].taken = true;
 
-            this.history.push({
-                spinner: this.currentSpinner,
-                receiver: this.currentResult.owner
-            });
+        this.history.push({
+            spinner: this.currentSpinner,
+            receiver: this.currentResult.owner
+        });
 
-            this.modal.el.classList.add('hidden');
-            this.switchScreen('dashboard');
-            this.renderDashboard();
-        }
+        this.modal.el.classList.add('hidden');
+        this.switchScreen('dashboard');
+        this.renderDashboard();
+    }
 
-        showGameOver() {
-            this.dashboard.grid.innerHTML = '<div style="width:100%; text-align:center;"><h2>遊戲結束</h2><p>大家都抽完禮物了！</p></div>';
-        }
+    showGameOver() {
+        this.dashboard.grid.innerHTML = '<div style="width:100%; text-align:center;"><h2>遊戲結束</h2><p>大家都抽完禮物了！</p></div>';
     }
 
     /* --- Utilities --- */
