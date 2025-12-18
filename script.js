@@ -356,6 +356,7 @@ class GiftExchangeApp {
                     }
                 } catch (e) {
                     logToConsole("Anim Err: " + e.message);
+                    alert("Anim Err: " + e.message);
                     this.isSpinning = false;
                     this.wheel.spinBtn.disabled = false;
                 }
@@ -364,6 +365,7 @@ class GiftExchangeApp {
             requestAnimationFrame(animate);
         } catch (e) {
             logToConsole("Spin Err: " + e.message);
+            alert("Spin Err: " + e.message); // FORCE ALERT
             this.isSpinning = false;
             this.wheel.spinBtn.disabled = false;
         }
