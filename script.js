@@ -342,7 +342,7 @@ class GiftExchangeApp {
                     const progress = timestamp - start;
 
                     if (progress < spinDuration) {
-                        const t = progress / spinDuration;
+                        let t = progress / spinDuration;
                         const ease = (--t) * t * t + 1;
 
                         const currentRot = finalAngle * ease;
