@@ -49,6 +49,7 @@ class GiftExchangeApp {
         this.fireworksCanvas = document.getElementById('fireworks-canvas');
         this.fireworksCtx = this.fireworksCanvas.getContext('2d');
 
+        this.isSpinning = false; // Initialize explicitly
         this.init();
     }
 
@@ -293,6 +294,12 @@ class GiftExchangeApp {
 
     spinWheel() {
         if (this.isSpinning) return;
+
+        if (!this.targetOptions || this.targetOptions.length === 0) {
+            alert("錯誤: 沒有可用的禮物選項！可能是名單邏輯問題，請重新開始嘗試。");
+            return;
+        }
+
         this.isSpinning = true;
         this.wheel.spinBtn.disabled = true;
 

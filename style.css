@@ -19,6 +19,8 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-light);
     height: 100vh;
+    height: 100dvh;
+    /* Dynamic viewport height for mobile */
     overflow: hidden;
     /* Prevent scroll on main body */
     display: flex;
@@ -30,13 +32,13 @@ body {
     width: 100%;
     max-width: 500px;
     height: 100%;
-    max-height: 900px;
     background: #252525;
     position: relative;
     overflow-y: auto;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
+    /* Ensure content doesn't get hidden behind toolbars if not handled by dvh */
 }
 
 /* Effect Layer */
@@ -152,6 +154,8 @@ button:active {
     list-style: none;
     overflow-y: auto;
     flex: 1;
+    min-height: 0;
+    /* Critical for nested flex scrolling */
     margin-bottom: 20px;
 }
 
