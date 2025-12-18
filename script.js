@@ -405,7 +405,11 @@ class GiftExchangeApp {
             const targetMidAngle = (randomIndex + 0.5) * sliceArc;
             // Add extra rotations - make it variable for realism
             const extraRotations = (10 + Math.random() * 5) * (2 * Math.PI);
-            const finalAngle = extraRotations - targetMidAngle;
+            // targetMidAngle is where the slice middle is relative to 0 (3 o'clock) in wheel coords.
+            // We want slice middle to land at 12 o'clock (-PI/2).
+            // (angleOffset + targetMidAngle) = -PI/2
+            // angleOffset = -PI/2 - targetMidAngle
+            const finalAngle = extraRotations - targetMidAngle - (Math.PI / 2);
 
             if (isNaN(finalAngle)) throw new Error("角度計算錯誤 (NaN)");
 

@@ -20,6 +20,11 @@
 body {
     font-family: 'Noto Sans TC', sans-serif;
     background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+    background-image:
+        radial-gradient(circle at center, rgba(168, 0, 0, 0.1) 0%, transparent 70%),
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+        url('https://www.transparenttextures.com/patterns/dark-matter.png');
+    /* Subtle texture */
     color: var(--text-light);
     height: 100dvh;
     overflow: hidden;
@@ -236,25 +241,41 @@ header {
 /* History */
 #history-log {
     margin-top: 20px;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    border-radius: 8px;
-    max-height: 150px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    border-radius: 12px;
+    max-height: 250px;
+    /* Brigger */
     overflow-y: auto;
+    border-top: 1px solid var(--primary-green);
 }
 
 #history-log h3 {
-    font-size: 1rem;
-    color: #888;
-    margin-bottom: 5px;
+    font-size: 1.2rem;
+    color: var(--accent-gold);
+    margin-bottom: 10px;
     text-align: left;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
 }
 
 #history-list li {
-    font-size: 0.9rem;
-    color: #ccc;
-    margin-bottom: 4px;
+    font-size: 1.1rem;
+    /* Bigger font */
+    color: var(--text-light);
+    margin-bottom: 10px;
     list-style: none;
+    padding-left: 20px;
+    position: relative;
+}
+
+#history-list li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: var(--primary-red);
+    font-size: 0.8rem;
+    top: 4px;
 }
 
 /* Wheel Screen */
@@ -275,14 +296,13 @@ header {
 
 .wheel-arrow {
     position: absolute;
-    top: 50%;
-    right: 0;
-    /* Position at 3 o'clock */
-    transform: translate(50%, -50%) rotate(-90deg);
-    /* Adjust logic if we draw 0 at 3 o'clock */
-    font-size: 2rem;
-    color: white;
-    text-shadow: 0 0 5px black;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -10px);
+    /* Position at 12 o'clock */
+    font-size: 2.5rem;
+    color: var(--accent-gold);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     z-index: 10;
     pointer-events: none;
 }
