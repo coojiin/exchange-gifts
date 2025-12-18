@@ -293,58 +293,66 @@ class GiftExchangeApp {
     }
 
     spinWheel() {
-        if (this.isSpinning) return;
+        try {
+            if (this.isSpinning) return;
 
-        if (!this.targetOptions || this.targetOptions.length === 0) {
-            alert("錯誤: 沒有可用的禮物選項！可能是名單邏輯問題，請重新開始嘗試。");
-            return;
-        }
-
-        this.isSpinning = true;
-        this.wheel.spinBtn.disabled = true;
-
-        // Random outcome
-        const randomIndex = Math.floor(Math.random() * this.targetOptions.length);
-        const selectedGift = this.targetOptions[randomIndex];
-
-        // Animation
-        const spinDuration = 4000; // 4s
-        // Calculate stop angle
-        // Current Angle is 0 at 3 o'clock. Arrow is at 3 o'clock aka 0.
-        // We want the MIDDLE of the slice to land on 0.
-        // Slices start at 0. Slice i is [i*arc, (i+1)*arc]. Mid is (i+0.5)*arc.
-
-        const sliceArc = (2 * Math.PI) / this.targetOptions.length;
-        const targetMidAngle = (randomIndex + 0.5) * sliceArc;
-
-        // We want (angleOffset + targetMidAngle) % 2PI = 0
-        // => angleOffset = -targetMidAngle
-        // Add extra rotations
-        const extraRotations = 10 * (2 * Math.PI);
-        const finalAngle = extraRotations - targetMidAngle;
-
-        let start = null;
-
-        const animate = (timestamp) => {
-            if (!start) start = timestamp;
-            const progress = timestamp - start;
-
-            if (progress < spinDuration) {
-                // Ease out cubic
-                const t = progress / spinDuration;
-                const ease = (--t) * t * t + 1;
-
-                const currentRot = finalAngle * ease;
-                this.drawWheel(currentRot);
-                requestAnimationFrame(animate);
-            } else {
-                this.drawWheel(finalAngle);
-                this.isSpinning = false;
-                setTimeout(() => this.showResult(selectedGift), 500);
+            if (!this.targetOptions || this.targetOptions.length === 0) {
+                alert("錯誤: 沒有可用的禮物選項！可能是名單邏輯問題，請重新開始嘗試。");
+                return;
             }
-        };
 
-        requestAnimationFrame(animate);
+            this.isSpinning = true;
+            this.wheel.spinBtn.disabled = true;
+
+            // Random outcome
+            const randomIndex = Math.floor(Math.random() * this.targetOptions.length);
+            const selectedGift = this.targetOptions[randomIndex];
+
+            // Animation
+            const spinDuration = 4000; // 4s
+
+            const sliceArc = (2 * Math.PI) / this.targetOptions.length;
+            const targetMidAngle = (randomIndex + 0.5) * sliceArc;
+
+            const extraRotations = 10 * (2 * Math.PI);
+            const finalAngle = extraRotations - targetMidAngle;
+
+            if (isNaN(finalAngle)) {
+                throw new Error("角度計算錯誤 (NaN)");
+            }
+
+            let start = null;
+
+            const animate = (timestamp) => {
+                try {
+                    if (!start) start = timestamp;
+                    const progress = timestamp - start;
+
+                    if (progress < spinDuration) {
+                        const t = progress / spinDuration;
+                        const ease = (--t) * t * t + 1;
+
+                        const currentRot = finalAngle * ease;
+                        this.drawWheel(currentRot);
+                        requestAnimationFrame(animate);
+                    } else {
+                        this.drawWheel(finalAngle);
+                        this.isSpinning = false;
+                        setTimeout(() => this.showResult(selectedGift), 500);
+                    }
+                } catch (e) {
+                    alert('動畫執行錯誤: ' + e.message);
+                    this.isSpinning = false;
+                    this.wheel.spinBtn.disabled = false;
+                }
+            };
+
+            requestAnimationFrame(animate);
+        } catch (e) {
+            alert("啟動轉盤錯誤: " + e.message);
+            this.isSpinning = false;
+            this.wheel.spinBtn.disabled = false;
+        }
     }
 
     /* --- Result Phase --- */
@@ -439,4 +447,11 @@ class GiftExchangeApp {
 }
 
 // Global instance for onclick handlers
+// Global instance for onclick handlers
 const app = new GiftExchangeApp();
+
+window.onerror = function (msg, url, line, col, error) {
+    // Ignore ResizeObserver loop limit exceeded
+    if (msg.includes('ResizeObserver')) return;
+    alert(`System Error: ${msg}\nLine: ${line}`);
+};
