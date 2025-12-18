@@ -1,7 +1,6 @@
 /**
  * Gift Exchange Web App Logic
  */
-alert("版本: 15:27 (修復括號)");
 
 class SoundManager {
     constructor() {
@@ -34,17 +33,43 @@ class SoundManager {
             osc.connect(gain);
             gain.connect(this.ctx.destination);
 
-            // High pitch short tick
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+            osc.frequency.setValueAtTime(600, this.ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.05);
 
-            gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
 
             osc.start();
             osc.stop(this.ctx.currentTime + 0.05);
-        } catch (e) { /* Ignore audio errors */ }
+        } catch (e) { }
+    }
+
+    playSuccess() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+            const now = this.ctx.currentTime;
+
+            const playNote = (freq, start, duration) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + start);
+                gain.gain.setValueAtTime(0, now + start);
+                gain.gain.linearRampToValueAtTime(0.3, now + start + 0.05);
+                gain.gain.linearRampToValueAtTime(0, now + start + duration);
+                osc.start(now + start);
+                osc.stop(now + start + duration);
+            };
+
+            // Little major chord "Ta-da!"
+            playNote(523.25, 0, 0.2);     // C5
+            playNote(659.25, 0.1, 0.2);   // E5
+            playNote(783.99, 0.2, 0.5);   // G5
+            playNote(1046.50, 0.3, 0.8);  // C6
+        } catch (e) { }
     }
 }
 
@@ -230,11 +255,17 @@ class GiftExchangeApp {
 
     selectSpinner(name) {
         this.currentSpinner = name;
-        this.switchScreen('wheel');
-        this.wheel.title.textContent = name;
-        this.wheel.spinBtn.disabled = false;
+        this.targetOptions = this.getValidTargets(name);
 
-        this.prepareWheel();
+        if (this.targetOptions.length === 1) {
+            // Only 1 choice remains -> skip wheel and show result immediately
+            this.showResult(this.targetOptions[0]);
+        } else {
+            this.switchScreen('wheel');
+            this.wheel.title.textContent = name;
+            this.wheel.spinBtn.disabled = false;
+            this.drawWheel(0);
+        }
     }
 
     /* --- Logic Core --- */
@@ -291,10 +322,7 @@ class GiftExchangeApp {
 
     /* --- Wheel Phase --- */
 
-    prepareWheel() {
-        this.targetOptions = this.getValidTargets(this.currentSpinner);
-        this.drawWheel(0);
-    }
+
 
     drawWheel(angleOffset) {
         if (!this.wheel.ctx) {
@@ -369,14 +397,14 @@ class GiftExchangeApp {
             const selectedGift = this.targetOptions[randomIndex];
 
             // Animation Config
-            const spinDuration = 8000; // Increased to 8s
+            const spinDuration = 10000; // Increased to 10s
             const sliceCount = this.targetOptions.length;
             const sliceArc = (2 * Math.PI) / sliceCount;
 
             // Target Calculation
             const targetMidAngle = (randomIndex + 0.5) * sliceArc;
             // Add extra rotations - make it variable for realism
-            const extraRotations = (8 + Math.random() * 4) * (2 * Math.PI);
+            const extraRotations = (10 + Math.random() * 5) * (2 * Math.PI);
             const finalAngle = extraRotations - targetMidAngle;
 
             if (isNaN(finalAngle)) throw new Error("角度計算錯誤 (NaN)");
@@ -391,15 +419,14 @@ class GiftExchangeApp {
 
                     if (progress < spinDuration) {
                         let t = progress / spinDuration;
-                        // Cubic/Quartic ease out for heavy inertia feel
-                        // 1 - (1-t)^4
-                        const ease = 1 - Math.pow(1 - t, 4);
+                        // Quintic ease out for heavy inertia feel
+                        const ease = 1 - Math.pow(1 - t, 5);
 
                         const currentRot = finalAngle * ease;
                         this.drawWheel(currentRot);
 
                         // Sound Logic: Check boundary crossing
-                        // We track Rotation in Radians. 
+                        // We track Rotation in Radians.
                         // Every sliceArc radians we should tick? Or every small division.
                         // Let's tick N times per rotation where N = sliceCount
                         // Check if floor(current / sliceArc) > floor(last / sliceArc)
@@ -419,7 +446,8 @@ class GiftExchangeApp {
                         setTimeout(() => this.showResult(selectedGift), 500);
                     }
                 } catch (e) {
-                    alert("Anim Err: " + e.message);
+                    // Fail silently or log to console in production
+                    console.error(e);
                     this.isSpinning = false;
                     this.wheel.spinBtn.disabled = false;
                 }
@@ -427,7 +455,7 @@ class GiftExchangeApp {
 
             requestAnimationFrame(animate);
         } catch (e) {
-            alert("Spin Err: " + e.message);
+            console.error(e);
             this.isSpinning = false;
             this.wheel.spinBtn.disabled = false;
         }
@@ -441,6 +469,7 @@ class GiftExchangeApp {
         this.modal.gift.textContent = gift.owner;
         this.modal.el.classList.remove('hidden');
 
+        this.sound.playSuccess(); // Play "Ta-da!"
         this.triggerConfetti();
     }
 
@@ -525,8 +554,4 @@ class GiftExchangeApp {
 }
 
 // Global instance for onclick handlers
-try {
-    const app = new GiftExchangeApp();
-} catch (e) {
-    alert("初始化錯誤: " + e.message + "\n" + e.stack);
-}
+const app = new GiftExchangeApp();
