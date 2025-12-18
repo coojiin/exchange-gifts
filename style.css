@@ -64,7 +64,8 @@ body {
     opacity: 0;
 }
 
-.hidden {
+.hidden,
+#result-modal.hidden {
     display: none !important;
 }
 
