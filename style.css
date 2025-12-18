@@ -207,10 +207,13 @@ header {
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 15px;
+    gap: 12px;
     overflow-y: auto;
-    flex: 1;
+    max-height: 25vh;
+    /* Keep selection area smaller */
     align-content: start;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
 }
 
 .spinner-card {
@@ -240,14 +243,15 @@ header {
 
 /* History */
 #history-log {
-    margin-top: 20px;
+    margin-top: 15px;
     background: rgba(0, 0, 0, 0.4);
     padding: 20px;
     border-radius: 12px;
-    max-height: 250px;
-    /* Brigger */
+    flex: 1;
+    /* Occupy remaining 2/3 space */
     overflow-y: auto;
-    border-top: 1px solid var(--primary-green);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 #history-log h3 {
@@ -337,11 +341,13 @@ header {
 }
 
 #result-gift {
-    font-size: 2.5rem;
-    font-weight: bold;
+    font-size: 3rem;
+    /* Even bigger */
+    font-weight: 900;
     display: block;
     margin-bottom: 10px;
     color: var(--accent-gold);
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
 }
 
 .gift-icon {

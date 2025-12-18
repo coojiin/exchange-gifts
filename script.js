@@ -325,12 +325,7 @@ class GiftExchangeApp {
 
 
     drawWheel(angleOffset) {
-        if (!this.wheel.ctx) {
-            logToConsole("Err: Context missing!");
-            return;
-        }
-        // ... Log once or verify dimensions
-        if (this.wheel.canvas.width === 0) logToConsole("Warn: Canvas W=0");
+        if (!this.wheel.ctx) return;
 
         const ctx = this.wheel.ctx;
         const width = 300; // Logical width
@@ -399,17 +394,18 @@ class GiftExchangeApp {
             // Animation Config
             const spinDuration = 10000; // Increased to 10s
             const sliceCount = this.targetOptions.length;
-            const sliceArc = (2 * Math.PI) / sliceCount;
+            const sliceArc = (2 * Math.PI) / this.targetOptions.length;
 
-            // Target Calculation
+            // targetMidAngle is where the slice center is relative to 3 o'clock
             const targetMidAngle = (randomIndex + 0.5) * sliceArc;
-            // Add extra rotations - make it variable for realism
+
+            // Arrow is at the Top (which is -PI/2 in Canvas coords)
+            const arrowAngle = -Math.PI / 2;
+
+            // We want WheelRotation + targetMidAngle = arrowAngle
+            // WheelRotation = arrowAngle - targetMidAngle
             const extraRotations = (10 + Math.random() * 5) * (2 * Math.PI);
-            // targetMidAngle is where the slice middle is relative to 0 (3 o'clock) in wheel coords.
-            // We want slice middle to land at 12 o'clock (-PI/2).
-            // (angleOffset + targetMidAngle) = -PI/2
-            // angleOffset = -PI/2 - targetMidAngle
-            const finalAngle = extraRotations - targetMidAngle - (Math.PI / 2);
+            const finalAngle = extraRotations + (arrowAngle - targetMidAngle);
 
             if (isNaN(finalAngle)) throw new Error("角度計算錯誤 (NaN)");
 
