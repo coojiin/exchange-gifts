@@ -1,0 +1,314 @@
+:root {
+    --primary-red: #D42426;
+    --primary-green: #165B33;
+    --accent-gold: #F8B229;
+    --bg-dark: #1A1A1A;
+    --text-light: #F0F0F0;
+    --text-dark: #333333;
+    --card-bg: #2C2C2C;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    height: 100vh;
+    overflow: hidden; /* Prevent scroll on main body */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+    max-height: 900px;
+    background: #252525;
+    position: relative;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Effect Layer */
+#fireworks-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* Screens */
+.screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    transition: opacity 0.3s ease;
+}
+
+.screen.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.screen.active {
+    opacity: 1;
+}
+
+/* Typography */
+h1, h2 {
+    font-family: 'Mountains of Christmas', cursive;
+    color: var(--primary-red);
+    text-shadow: 2px 2px 0px #000;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; color: var(--accent-gold); }
+
+/* Buttons */
+button {
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    border-radius: 8px;
+    transition: transform 0.1s, filter 0.2s;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+.main-action-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: var(--primary-red);
+    color: white;
+    margin-top: auto; /* Push to bottom */
+    box-shadow: 0 4px 0 #9e1b1d;
+}
+
+.main-action-btn:disabled {
+    background-color: #555;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Setup Screen */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#name-input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    background: #333;
+    color: white;
+    font-size: 1rem;
+}
+
+#add-btn {
+    padding: 0 20px;
+    background-color: var(--primary-green);
+    color: white;
+    font-weight: bold;
+}
+
+#participants-list {
+    list-style: none;
+    overflow-y: auto;
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.participant-item {
+    background: var(--card-bg);
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+.remove-btn {
+    background: transparent;
+    color: #ff6b6b;
+    font-size: 1.2rem;
+    padding: 5px;
+}
+
+/* Dashboard */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.progress-info {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+    overflow-y: auto;
+    flex: 1;
+    align-content: start;
+}
+
+.spinner-card {
+    background: var(--card-bg);
+    border: 2px solid var(--primary-green);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.spinner-card:hover {
+    transform: translateY(-2px);
+    background: #3a3a3a;
+}
+
+.spinner-card h3 {
+    margin: 0;
+    font-family: 'Mountains of Christmas';
+    font-size: 1.5rem;
+    color: var(--text-light);
+}
+
+/* History */
+#history-log {
+    margin-top: 20px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+#history-log h3 {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+#history-list li {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-bottom: 4px;
+    list-style: none;
+}
+
+/* Wheel Screen */
+.wheel-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin: 20px 0;
+}
+
+#wheel-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    filter: drop-shadow(0 0 10px rgba(248, 178, 41, 0.3));
+}
+
+.wheel-arrow {
+    position: absolute;
+    top: 50%;
+    right: 0; /* Position at 3 o'clock */
+    transform: translate(50%, -50%) rotate(-90deg); /* Adjust logic if we draw 0 at 3 o'clock */
+    font-size: 2rem;
+    color: white;
+    text-shadow: 0 0 5px black;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.modal-content {
+    background: var(--primary-red);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    width: 80%;
+    max-width: 400px;
+    border: 4px solid var(--accent-gold);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gift-reveal {
+    margin: 30px 0;
+}
+
+#result-gift {
+    font-size: 2.5rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+    color: var(--accent-gold);
+}
+
+.gift-icon {
+    font-size: 4rem;
+    animation: bounce 1s infinite;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}

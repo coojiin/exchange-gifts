@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聖誕交換禮物</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Effect Layer -->
+        <canvas id="fireworks-canvas"></canvas>
+
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="screen active">
+            <h1>🎅 交換禮物大會 🎄</h1>
+            <div class="input-group">
+                <input type="text" id="name-input" placeholder="輸入參加者名字" />
+                <button id="add-btn">新增</button>
+            </div>
+            <ul id="participants-list">
+                <!-- List items here -->
+            </ul>
+            <button id="start-game-btn" class="main-action-btn" disabled>開始遊戲 (0人)</button>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen" class="screen hidden">
+            <header>
+                <h2>🎁 誰要抽禮物？</h2>
+                <div class="progress-info">剩餘: <span id="remaining-count">0</span></div>
+            </header>
+            <div class="card-grid" id="spinner-selection-grid">
+                <!-- Cards for each person who hasn't spun yet -->
+            </div>
+            <div id="history-log">
+                <h3>📜 紀錄</h3>
+                <ul id="history-list"></ul>
+            </div>
+        </div>
+
+        <!-- Wheel Screen -->
+        <div id="wheel-screen" class="screen hidden">
+            <h2><span id="current-spinner-name"></span> 正在抽...</h2>
+            <div class="wheel-container">
+                <canvas id="wheel-canvas" width="300" height="300"></canvas>
+                <div class="wheel-arrow">▼</div>
+            </div>
+            <button id="spin-btn" class="main-action-btn">開始轉動!</button>
+        </div>
+
+        <!-- Result Modal -->
+        <div id="result-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎉 恭喜! 🎉</h2>
+                <p><span id="result-spinner">User</span> 抽到了...</p>
+                <div class="gift-reveal">
+                    <span id="result-gift">Target</span>
+                    <div class="gift-icon">🎁</div>
+                </div>
+                <button id="confirm-result-btn" class="main-action-btn">確認</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
