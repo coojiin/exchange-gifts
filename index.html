@@ -1,78 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>聖誕交換禮物</title>
-    <link rel="stylesheet" href="style.css?v=9">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap"
-        rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10251e">
+  <title>交換禮物大會 · Christmas Social</title>
+  <link rel="stylesheet" href="style.css?v=10">
 </head>
-
 <body>
-    <div class="app-container">
-        <!-- Effect Layer -->
-        <canvas id="fireworks-canvas"></canvas>
-
-        <!-- Setup Screen -->
-        <div id="setup-screen" class="screen active">
-            <h1>交換禮物大會</h1>
-            <div class="input-group">
-                <input type="text" id="name-input" placeholder="輸入參加者名字" />
-                <button id="add-btn">新增</button>
-            </div>
-            <ul id="participants-list">
-                <!-- List items here -->
-            </ul>
-            <button id="start-game-btn" class="main-action-btn" disabled>開始遊戲 (0人)</button>
+  <div class="ambient" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="app-container">
+    <header class="brand"><span class="brand-mark" aria-hidden="true">✦</span><span>CHRISTMAS SOCIAL <small>把驚喜，送給彼此。</small></span><button id="sound-btn" class="quiet-btn" aria-label="關閉音效" aria-pressed="true">音效 開</button></header>
+    <main>
+      <section id="setup-screen" class="screen active" aria-labelledby="setup-title">
+        <div class="eyebrow">THE GIFT EXCHANGE · 01</div>
+        <h1 id="setup-title">好禮就緒，<br>驚喜即將開始<span>。</span></h1>
+        <p class="subtitle">邀請大家加入，讓每一份心意找到新主人。</p>
+        <div class="setup-panel">
+          <label for="name-input">今晚的嘉賓</label>
+          <div class="input-group"><input type="text" id="name-input" placeholder="輸入參加者名字" autocomplete="off" maxlength="40"><button id="add-btn">＋ 新增</button></div>
+          <p id="input-message" class="input-message" role="status" aria-live="polite"></p>
+          <div class="list-heading"><span>參加名單</span><span id="participant-count">0 位</span></div>
+          <div id="empty-list" class="empty-state"><span aria-hidden="true">✧</span><p>第一份驚喜，從一個名字開始。</p></div>
+          <ul id="participants-list" aria-label="參加名單"></ul>
         </div>
-
-        <!-- Dashboard Screen -->
-        <div id="dashboard-screen" class="screen hidden">
-            <header>
-                <h2>誰要抽禮物？</h2>
-                <div class="progress-info">剩餘: <span id="remaining-count">0</span></div>
-            </header>
-            <div class="card-grid" id="spinner-selection-grid">
-                <!-- Cards for each person who hasn't spun yet -->
-            </div>
-            <div id="history-log">
-                <h3>📜 紀錄</h3>
-                <ul id="history-list"></ul>
-            </div>
-        </div>
-
-        <!-- Wheel Screen -->
-        <div id="wheel-screen" class="screen hidden">
-            <h2><span id="current-spinner-name"></span> 正在抽...</h2>
-            <div class="wheel-container">
-                <canvas id="wheel-canvas" width="300" height="300"></canvas>
-                <div class="wheel-arrow">▼</div>
-            </div>
-            <button id="spin-btn" class="main-action-btn">開始轉動!</button>
-        </div>
-
-        <!-- Result Modal -->
-        <div id="result-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>恭喜!</h2>
-                <p><span id="result-spinner">User</span> 抽到了...</p>
-                <div class="gift-reveal">
-                    <span id="result-gift">Target</span>
-                    <div class="gift-icon">★</div>
-                </div>
-                <button id="confirm-result-btn" class="main-action-btn">確認</button>
-            </div>
-        </div>
-
-
-    </div>
-
-    <script src="script.js?v=9"></script>
+        <div class="action-footer"><p class="helper">至少 2 人參加 · 不會抽到自己的禮物</p><button id="start-game-btn" class="main-action-btn" disabled>開始遊戲 (0人)</button></div>
+      </section>
+      <section id="dashboard-screen" class="screen hidden" aria-labelledby="dashboard-title" inert>
+        <div class="eyebrow">THE GIFT EXCHANGE · 02</div>
+        <div class="section-heading"><div><h1 id="dashboard-title">下一位，誰來？</h1><p class="subtitle">選擇一位嘉賓，開啟專屬驚喜。</p></div><div class="progress-info"><strong id="completed-count">0 / 0</strong><span>已完成 · 剩餘 <span id="remaining-count">0</span> 位</span></div></div>
+        <div id="game-progress" class="progress-track" role="progressbar" aria-label="抽獎進度" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><div id="progress-fill"></div></div>
+        <div class="dashboard-layout"><div><div class="list-heading"><span>等待開啟的驚喜</span><span aria-hidden="true">✦</span></div><div class="card-grid" id="spinner-selection-grid"></div></div><aside id="history-log"><div class="list-heading"><h2>心意紀錄</h2><span>GIFT NOTES</span></div><p id="empty-history" class="helper">每一份驚喜，都會記在這裡。</p><ol id="history-list" aria-live="polite"></ol></aside></div>
+      </section>
+      <section id="wheel-screen" class="screen hidden" aria-labelledby="wheel-title" inert>
+        <div class="eyebrow">A LITTLE MOMENT OF MAGIC</div><h1 id="wheel-title"><span id="current-spinner-name"></span><span class="title-small">這份驚喜，會是誰的心意？</span></h1>
+        <div class="wheel-container"><div class="wheel-stage"><div class="wheel-lights" aria-hidden="true"></div><canvas id="wheel-canvas" width="300" height="300" aria-label="禮物抽獎轉盤"></canvas><div class="wheel-hub" aria-hidden="true">✦</div><div class="wheel-arrow" aria-hidden="true">▼</div></div></div>
+        <p id="wheel-status" class="wheel-status" role="status">準備好了嗎？讓好運轉起來。</p><button id="spin-btn" class="main-action-btn">開始轉動 ✦</button>
+      </section>
+    </main>
+    <footer class="site-footer">A LITTLE GIFT. A LOT OF JOY.</footer>
+  </div>
+  <div id="result-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="result-title" inert><div class="modal-content"><div class="eyebrow">A GIFT, JUST FOR YOU</div><h2 id="result-title">驚喜正在拆封</h2><p><span id="result-spinner"></span>，你的禮物來自</p><div class="gift-box" aria-hidden="true"><div class="gift-glow"></div><div class="gift-lid"><span>✧</span></div><div class="gift-body"></div></div><div class="gift-reveal" aria-live="polite"><span id="result-gift"></span><span class="helper">的用心準備</span></div><button id="confirm-result-btn" class="main-action-btn" disabled>收下這份驚喜 →</button></div></div>
+  <canvas id="fireworks-canvas" aria-hidden="true"></canvas>
+  <script src="script.js?v=10"></script>
 </body>
-
 </html>
