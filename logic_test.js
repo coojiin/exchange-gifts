@@ -1,111 +1,86 @@
-
-// Mocking the App state structure for testing
-class GiftExchangeLogic {
-    constructor() {
-        this.participants = [];
-        this.gifts = [];
-        this.history = [];
+// No dependencies: node logic_test.js. Exercise production code, not a copied algorithm.
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const source = fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8');
+const elements = new Map();
+function element() {
+    const classes = new Set();
+    return { textContent: '', disabled: false, inert: false, style: {},
+        classList: { add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)) },
+        focus() {}, querySelector() { return element(); } };
+}
+const context = { console: { ...console, log() {} }, setTimeout, requestAnimationFrame: cb => setTimeout(() => cb(Date.now()), 0),
+    document: { getElementById(id) { if (!elements.has(id)) elements.set(id, element()); return elements.get(id); }, querySelector() { return element(); } } };
+vm.createContext(context);
+vm.runInContext(source.replace('const app = new GiftExchangeApp();', 'this.App = GiftExchangeApp;'), context);
+const App = context.App;
+let states = 0, completed = 0;
+function visit(app) {
+    states++;
+    const remaining = app.participants.filter(p => !app.history.some(h => h.spinner === p));
+    if (!remaining.length) {
+        assert.equal(new Set(app.history.map(h => h.receiver)).size, app.participants.length);
+        assert(app.history.every(h => h.spinner !== h.receiver)); completed++; return;
     }
-
-    getValidTargets(spinnerName) {
-        // 1. Basic Candidates: Not taken, Not own gift
-        const candidates = this.gifts.filter(g => !g.taken && g.owner !== spinnerName);
-
-        const remainingSpinners = this.participants.filter(p =>
-            !this.history.some(h => h.spinner === p)
-        );
-
-        if (remainingSpinners.length <= 1) return candidates;
-
-        if (remainingSpinners.length === 2) {
-            const lastPerson = remainingSpinners.find(p => p !== spinnerName);
-
-            return candidates.filter(gift => {
-                const allAvailable = this.gifts.filter(g => !g.taken);
-                const remainingForLast = allAvailable.filter(g => g.owner !== gift.owner);
-
-                const validForLast = remainingForLast.filter(g => g.owner !== lastPerson);
-
-                if (validForLast.length === 0) {
-                    // Deadlock detected
-                    return false;
-                }
-                return true;
-            });
+    for (const spinner of remaining) {
+        const targets = app.getValidTargets(spinner);
+        assert(targets.length > 0, 'Every possible next spinner must retain a valid target');
+        for (const target of targets) {
+            assert(!target.taken && target.owner !== spinner);
+            target.taken = true; app.history.push({ spinner, receiver: target.owner });
+            visit(app);
+            app.history.pop(); target.taken = false;
         }
-        return candidates;
     }
 }
-
-// Global assert
-function assert(condition, msg) {
-    if (!condition) {
-        console.error("FAIL: " + msg);
-        process.exit(1);
-    } else {
-        console.log("PASS: " + msg);
-    }
+for (let size = 2; size <= 5; size++) {
+    const app = Object.create(App.prototype);
+    app.participants = Array.from({ length: size }, (_, i) => String(i));
+    app.gifts = app.participants.map(owner => ({ owner, taken: false })); app.history = [];
+    visit(app);
 }
-
-const app = new GiftExchangeLogic();
-
-// Scenario 1: Basic 3 People A, B, C
-// A takes B.
-console.log("Running Scenario 1 (3 People, A->B)...");
-app.participants = ['A', 'B', 'C'];
-app.gifts = [
-    { owner: 'A', taken: false },
-    { owner: 'B', taken: true },
-    { owner: 'C', taken: false }
-];
-app.history = [{ spinner: 'A', receiver: 'B' }];
-
-// B spins. Rem: B, C. Avail: A, C.
-// If B takes A, C gets C -> Deadlock.
-// B Must take C.
-const targetsB = app.getValidTargets('B');
-console.log("Targets for B:", targetsB.map(g => g.owner));
-assert(targetsB.length === 1 && targetsB[0].owner === 'C', "B must satisfy lookahead and pick C");
-
-// Scenario 2: 3 People A, B, C.
-// A takes C.
-console.log("Running Scenario 2 (3 People, A->C)...");
-app.participants = ['A', 'B', 'C'];
-app.gifts = [
-    { owner: 'A', taken: false },
-    { owner: 'B', taken: false },
-    { owner: 'C', taken: true }
-];
-app.history = [{ spinner: 'A', receiver: 'C' }];
-
-// B spins. Rem: B, C. Avail: A, B.
-// B cannot take B.
-// Candidate: A.
-// If B takes A, C gets B. Valid.
-const targetsB2 = app.getValidTargets('B');
-console.log("Targets for B:", targetsB2.map(g => g.owner));
-assert(targetsB2.length === 1 && targetsB2[0].owner === 'A', "B takes A (Only valid option anyway)");
-
-
-// Scenario 3: 4 People A, B, C, D.
-// A->C, B->D.
-console.log("Running Scenario 3 (4 People, A->C, B->D)...");
-app.participants = ['A', 'B', 'C', 'D'];
-app.gifts = [
-    { owner: 'A', taken: false },
-    { owner: 'B', taken: false },
-    { owner: 'C', taken: true },
-    { owner: 'D', taken: true }
-];
-app.history = [
-    { spinner: 'A', receiver: 'C' },
-    { spinner: 'B', receiver: 'D' }
-];
-// C spins. Rem: C, D. Avail: A, B.
-// C can take A (D gets B) -> OK.
-// C can take B (D gets A) -> OK.
-const targetsC = app.getValidTargets('C');
-console.log("Targets for C:", targetsC.map(g => g.owner));
-assert(targetsC.length === 2, "C has 2 valid options");
-
-console.log("All Tests Passed!");
+console.log(`PASS ${states} reachable states and ${completed} complete games (2–5 people, every selection order and valid outcome)`);
+function fixture() {
+    const app = Object.create(App.prototype);
+    app.participants = ['A', 'B', 'C']; app.gifts = app.participants.map(owner => ({ owner, taken: false })); app.history = [];
+    app.isSpinning = false; app.isResolving = false; app.isTransitioning = false;
+    app.reducedMotion = { matches: true };
+    app.sound = { resume() {}, playSuccess() {}, playTick() {} };
+    app.screens = { wheel: element(), dashboard: element() }; app.activeScreen = app.screens.wheel;
+    app.wheel = { spinBtn: element(), title: element() };
+    app.modal = { el: element(), spinner: element(), gift: element(), confirmBtn: element() };
+    app.dashboard = { grid: { querySelectorAll() { return [element(), element()]; }, querySelector() { return element(); } } };
+    app.animate = async () => {}; app.pause = async () => {}; app.triggerConfetti = () => {};
+    app.switchScreen = async name => { app.activeScreen = app.screens[name]; };
+    app.renderDashboard = () => {}; app.drawWheel = angle => { app.currentAngle = angle; };
+    return app;
+}
+(async () => {
+    const app = fixture(); app.currentSpinner = 'A'; app.targetOptions = app.getValidTargets('A');
+    let calls = 0, result;
+    const show = app.showResult;
+    app.showResult = async gift => { calls++; result = gift; await show.call(app, gift); };
+    await Promise.all([app.spinWheel(), app.spinWheel()]);
+    assert.equal(calls, 1, 'Repeated spin only draws once');
+    assert.equal(app.history.length, 0, 'Revealing does not write history');
+    assert(app.gifts.every(g => !g.taken), 'Revealing does not take a gift');
+    const arc = 2 * Math.PI / app.targetOptions.length;
+    const index = app.targetOptions.indexOf(result);
+    const center = (app.currentAngle + (index + .5) * arc) % (2 * Math.PI);
+    assert(Math.abs(center - 1.5 * Math.PI) < 1e-9, 'Visual segment matches selected result at pointer');
+    await Promise.all([app.confirmResult(), app.confirmResult()]);
+    assert.equal(app.history.length, 1, 'Repeated confirm commits once');
+    assert.equal(app.gifts.filter(g => g.taken).length, 1);
+    assert.equal(app.isResolving, false);
+    const last = fixture(); last.participants = ['A', 'B']; last.gifts = last.participants.map(owner => ({ owner, taken: false }));
+    last.activeScreen = last.screens.dashboard;
+    let wheelVisits = 0; last.switchScreen = async () => { wheelVisits++; };
+    await Promise.all([last.selectSpinner('A', element()), last.selectSpinner('B', element())]);
+    assert.equal(last.currentSpinner, 'A', 'Repeated selection keeps the first spinner');
+    assert.equal(wheelVisits, 0, 'One valid candidate skips the wheel');
+    assert.equal(last.currentResult.owner, 'B');
+    assert.equal(last.modal.confirmBtn.disabled, false, 'Reduced motion still allows confirmation');
+    console.log('PASS production spin/confirm guards, commit-on-confirm, pointer alignment, single-target skip, and reduced-motion result flow');
+})().catch(error => { console.error(error); process.exitCode = 1; });
